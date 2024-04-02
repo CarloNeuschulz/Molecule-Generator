@@ -29,7 +29,7 @@ class MyDialog(gui.GeDialog):
                 "b": mxutils.CheckType(c4d.BaseObject(c4d.Ocylinder))
             }
 
-        def CreateMaterial(name, color):
+        def CreateMaterial(name: str, color: c4d.Vector) -> c4d.BaseMaterial:
             mat = c4d.BaseMaterial(c4d.Mmaterial)
             mat.SetName(name)
             mat[c4d.MATERIAL_COLOR_COLOR] = color
@@ -41,14 +41,35 @@ class MyDialog(gui.GeDialog):
             tag[c4d.TEXTURETAG_MATERIAL] = m
             tag[c4d.TEXTURETAG_PROJECTION] = 6  # UVW Mapping
             op.InsertTag(tag)
+        
+        def CreateAtom(name, radius, parent):
+            atom = c4d.BaseObject(c4d.Osphere)
+            doc.InsertObject(atom, None, None)
+            atom.SetName(name)
+            atom[c4d.PRIM_SPHERE_RAD] = radius
 
-        oxygen = mxutils.CheckType(c4d.BaseObject(c4d.Osphere))
-        doc.InsertObject(oxygen, None, None)
-        oxygen.SetName("Oxygen")
+        def CreateNull(name):
+            # TODO: (Carlo) put implementation here
+            pass
 
-        null1 = mxutils.CheckType(c4d.BaseObject(c4d.Onull))
-        doc.InsertObject(null1, None, None)
-        null1.SetName("H2O")
+        def CreateInstance(name, referenceObjecet, parentObject):
+            # TODO: (Carlo) put implementation here
+            pass
+
+        
+        # Creating Library
+        oxygen = CreateAtom('Oxygen', 100)
+        hydrogen = CreateAtom('Hydrogen', 50)
+        connect = CreatConnection('Connection', 20)
+        null = CreateNull('Library')
+        
+        # Creating H2O
+
+        #null1 = mxutils.CheckType(c4d.BaseObject(c4d.Onull))
+        # doc.InsertObject(null1, None, None)
+        #null1.SetName("H2O")
+
+        null1 = CreateNull("h2o")
 
         instance = mxutils.CheckType(c4d.InstanceObject())
         doc.InsertObject(instance, null1, None)
@@ -56,10 +77,16 @@ class MyDialog(gui.GeDialog):
         doc.SetActiveObject(instance)
         instance.SetReferenceObject(oxygen)
 
-        hydrogen = mxutils.CheckType(c4d.BaseObject(c4d.Osphere))
-        doc.InsertObject(hydrogen, None, None)
-        hydrogen.SetName("hydrogen")
-        hydrogen[c4d.PRIM_SPHERE_RAD] = 50
+        m = c4d.Matrix(v1=c4d.Vector(0, 1, 0),
+                        v2=c4d.Vector(-1, 0, 0),
+                        v3=c4d.Vector(0, 0, 1))
+        instance = CreateInstance(name, oxygen, null1, pos, m)
+
+        # hydrogen = mxutils.CheckType(c4d.BaseObject(c4d.Osphere))
+        # doc.InsertObject(hydrogen, None, None)
+        # hydrogen.SetName("hydrogen")
+        # hydrogen[c4d.PRIM_SPHERE_RAD] = 50
+        
 
         instance1 = mxutils.CheckType(c4d.InstanceObject())
         doc.InsertObject(instance1, null1, None)
