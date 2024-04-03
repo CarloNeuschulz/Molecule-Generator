@@ -123,11 +123,15 @@ def CreatMolecule(moleculeIdx: int):
 	
 	# Creating the blocks using a loop
 	startingBlock = CreateEndingBlock(cLib, hLib, cnLib)
+	startingBlock.SetAbsPos(c4d.Vector(0, 0, 0))
 	startingBlock.SetRelRot(DegToRad(c4d.Vector(144.7356, -30, 35.2644)))
 
 	x=(numberOfIntermediateBlocks+1)*200
 	endingBlock = CreateEndingBlock(cLib, hLib, cnLib)
-	endingBlock.SetAbsPos(c4d.Vector(x, 0, 0))
+	endingBlock.SetAbsPos(c4d.Vector(x, 400, 0))
+	endingBlock.SetRelRot(DegToRad(c4d.Vector(324.7356, -30, 35.2644 ))) #sets the rotation of the ending block
+
+	
  
 	# intermediateBlock = CreatIntermediateBlock(cLib, hLib, cnLib)
 	# intermediateBlock.SetAbsPos(c4d.Vector(400, 200, 0))
@@ -140,16 +144,18 @@ def CreatMolecule(moleculeIdx: int):
 		isEven = (i % 2) == 0 #checks if the number of intermediate blocks is even or odd
 		intermediateBlock = CreatIntermediateBlock(cLib, hLib, cnLib)
 		if isEven: 	#checks if the number is even, then it places the intermediate block 200 units up on the y-axis and 200 units to the right on the x-axis
-			intermediateBlock.SetAbsPos(c4d.Vector(x, 200, 0))
+			intermediateBlock.SetAbsPos(c4d.Vector(x, 400, 0))
+			intermediateBlock.SetRelRot(DegToRad(c4d.Vector(0, 0, 315)))
 		else: 	#if the number is odd, then it places the intermediate block 200 units down on the y-axis and duble the amount of units to the right on the x-axis
-			intermediateBlock.SetAbsPos(c4d.Vector(x, -200, 0))
+			intermediateBlock.SetAbsPos(c4d.Vector(x, 0, 0))
+			intermediateBlock.SetRelRot(DegToRad(c4d.Vector(0, 0, 135)))
 		
 	# 	connectionBlock = CreatConnectionBlock(cnLib)	
 	return
 
 def main():
 	# Call the function with the desired number of molecules
-	moleculeIdx = 12  # 3 - propan, 4 - butan, 5 - pentan, 6 - hexan, 7 - heptan, 8 - octan, 9 - nonan, 10 - decan
+	moleculeIdx = 4  # 3 - propan, 4 - butan, 5 - pentan, 6 - hexan, 7 - heptan, 8 - octan, 9 - nonan, 10 - decan
 	CreatMolecule(moleculeIdx)
 	# Update the scene
 	c4d.EventAdd()
