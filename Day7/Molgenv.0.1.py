@@ -124,12 +124,12 @@ def CreatMetheanBlock(carbonlibrary, hydrogenLib, connectLib):
 	methanBlockParent = CreatNull('Metheanblock')
 	# Creates the methean block that consists of instance objects
 	carbon = CreatInstance('Carbon', carbonlibrary, methanBlockParent, c4d.Vector(0, 0, 0), c4d.Vector(0, 0, 0))	
-	hydrogen1 = CreatInstance('Hydrogen1', hydrogenLib, methanBlockParent, c4d.Vector(340, 0, 0), c4d.Vector(0, 0, 0))
-	hydrogen2 = CreatInstance('Hydrogen2', hydrogenLib, methanBlockParent, c4d.Vector(0, 340, 0), c4d.Vector(0, 0, 0))
-	hydrogen3 = CreatInstance('Hydrogen3', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, 340), c4d.Vector(0, 0, 0))
-	hydrogen4 = CreatInstance('Hydrogen4', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, -340), c4d.Vector(0, 0, 0))
-	hydrogen5 = CreatInstance('Hydrogen5', hydrogenLib, methanBlockParent, c4d.Vector(0, -340, 0), c4d.Vector(0, 0, 0))
-	hydrogen6 = CreatInstance('Hydrogen6', hydrogenLib, methanBlockParent, c4d.Vector(-340, 0, 0), c4d.Vector(0, 0, 0))
+	hydrogen1 = CreatInstance('Hydrogen1', hydrogenLib, methanBlockParent, c4d.Vector(-POSITION_h, 0, 0), c4d.Vector(0, 0, 0))
+	hydrogen2 = CreatInstance('Hydrogen2', hydrogenLib, methanBlockParent, c4d.Vector(0, -POSITION_h, 0), c4d.Vector(0, 0, 0))
+	hydrogen3 = CreatInstance('Hydrogen3', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, -POSITION_h), c4d.Vector(0, 0, 0))
+	hydrogen4 = CreatInstance('Hydrogen4', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, POSITION_h), c4d.Vector(0, 0, 0))
+	hydrogen5 = CreatInstance('Hydrogen5', hydrogenLib, methanBlockParent, c4d.Vector(0, POSITION_h, 0), c4d.Vector(0, 0, 0))
+	hydrogen6 = CreatInstance('Hydrogen6', hydrogenLib, methanBlockParent, c4d.Vector(POSITION_h, 0, 0), c4d.Vector(0, 0, 0))
 	connection1 = CreatInstance('Connection1', connectLib, methanBlockParent, c4d.Vector(195, 0, 0), c4d.Vector(0, 0, 90))   
 	connection2 = CreatInstance('Connection2', connectLib, methanBlockParent, c4d.Vector(0, 195, 0), c4d.Vector(0, 0, 0))
 	connection3 = CreatInstance('Connection3', connectLib, methanBlockParent, c4d.Vector(0, 0, 195), c4d.Vector(0, 90, 0))
@@ -216,22 +216,42 @@ def CreatMolecule(moleculeIdx: int):
 			connectionBlock.SetRelRot(DegToRad(c4d.Vector(0, 0, 330)))
 	return
 
-# def ParseUserInput(userInput: str) -> int:
+def ParseUserInput(userInput: str) -> int:
+	#Checks if the first character is the uppercase letter "C", if not it returns -1.
+    if userInput[0] != 'C':
+        return -1
+	
+    #Checks if the nex characters are numbers until the next uppercase letter "H", if not it returns -1
+    moleculeIdx = 0
+    for i in range(1, len(userInput)):
+        if userInput[i] == 'H':
+            moleculeIdx = int(userInput[1:i])
+            break
+        if not userInput[i].isdigit():
+            return -1
+		#checks if the character after the "H" is a number, that is the numbers behind "C" times "2" plus "2"
+    if not userInput[i+1].isdigit() or int(userInput[i+1]) != moleculeIdx*2+2:
+        return -1
+	#if there is no number after the "H" it returns -1
+    if i+1 == len(userInput):
+        return -1
+    return moleculeIdx
 
-# 	return -1
+	
 
 def main():
 
-	# userInput = 'C3H8' # Ask the user for the molecule
+	userInput = 'C3H8' # Ask the user for the molecule
 
-	# moleculeIdx = ParseUserInput(userInput)
+	moleculeIdx = ParseUserInput(userInput)
 
-	# if moleculeIdx == -1:
-	# 	gui.MessageDialog('Invalid input')
-	# 	return
+	if moleculeIdx == -1:
+		gui.MessageDialog('''Invalid input! 
+Please enter a valid formula (e.g. C2H6, C3H8, C4H10, ...)''')
+		return
 
 	# Call the function with the desired number of molecules
-	moleculeIdx = 2  #1 - Methan, 2 - Ethan, 3 - propan, 4 - butan, 5 - pentan, 6 - hexan, 7 - heptan, 8 - octan, 9 - nonan, 10 - decan "..."
+	# moleculeIdx = 2  #1 - Methan, 2 - Ethan, 3 - propan, 4 - butan, 5 - pentan, 6 - hexan, 7 - heptan, 8 - octan, 9 - nonan, 10 - decan "..."
 	CreatMolecule(moleculeIdx)
 	# Update the scene
 	c4d.EventAdd()
