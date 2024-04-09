@@ -38,7 +38,7 @@ MSG_ID_COLOR_CHANGED = 1000001
 class ExampleGeUserArea(c4d.gui.GeUserArea):
 
     # Color used to draw in the GeUserArea, values are from 0 to 1
-    color = c4d.Vector(1, 0, 0)
+    color = c4d.Vector(0, 0, 1)
 
     def DrawMsg(self, x1, y1, x2, y2, msg):
         # Defines the color used in draw operation
@@ -106,7 +106,7 @@ class ExampleDialog(c4d.gui.GeDialog):
 
             # Prepares the message to be send to the GeUserArea GeDialog.
             msgContainer = c4d.BaseContainer(MSG_ID_CHANGE_COLOR)
-            msgContainer.SetVector(0, c4d.Vector(0, 1, 0))
+            msgContainer.SetVector(0, c4d.Vector(0, 0.8, 0))
 
             # Send the message.
             self.SendMessage(GADGET_ID_GEUSERAREA, msgContainer)
