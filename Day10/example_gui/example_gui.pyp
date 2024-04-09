@@ -14,6 +14,7 @@ Class/method highlighted:
 """
 import c4d
 from c4d import documents
+from c4d import gui
 
 doc: c4d.documents.BaseDocument
 
@@ -107,7 +108,7 @@ class Molecule:
 		self.hydrogen = self.CreateAtom('H', 50, null1, matWhite)
 		self.carbon = self.CreateAtom('C', 100, null1, matBlack)
 		#creat a connection object
-		self.connection = self.CreateConnection('connection', 25, 100, null1, matGrey)
+		self.connection = self.CreateConnection('connection', 20, 450, null1, matGrey)
 
 	def CreatIntermediateBlock(self, carbonlibrary, hydrogenLib, connectLib):
 		#Creats null object named "Intermediateblock"
@@ -245,8 +246,10 @@ class MoleculeCyclicAlkane(Molecule):
 		print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
 		pass
 
-def CreateMolecule(userInput: str):
-	# checksuser input
+
+# Parses the user's input and returns the molecule index (or -1 if invalid)
+def ParseUserInputAndCreateMolecule(userInput: str):
+	# Parse user input
 	# returns either LA or CA (or None if invalid)
  
 	# # TODO: Implement
@@ -254,76 +257,109 @@ def CreateMolecule(userInput: str):
 	# 	return MoleculeLinearAlkane(3)
 	# elif 2 == 2:
 	# 	return MoleculeCyclicAlkane(4)
-	return MoleculeLinearAlkane(7)
+	return MoleculeLinearAlkane(3)
 	return None
 
+
+
 class ExampleDialog(c4d.gui.GeDialog):
+	TEXT_FIELD_ID = 1000
+	BUTTON_ID = 1001
 
-	
 	def CreateLayout(self):
-		"""This Method is called automatically when Cinema 4D Create the Layout (display) of the Dialog."""
-		# Defines the title of the Dialog
-		self.SetTitle("This is a Molecule Creator5")
+		# Add a larger text field to the dialog
+		self.AddEditText(self.TEXT_FIELD_ID, c4d.BFH_SCALEFIT, initw=300)
+		self.SetString(self.TEXT_FIELD_ID, "C3H8")  # Default text
 
-		# Creates a button to create a molecule	
-		# Creates a Ok and Cancel Button
-		self.AddDlgGroup(c4d.DLG_OK | c4d.DLG_CANCEL)
-		#Change the name of the Ok button to "Create"
-		self.SetString(c4d.DLG_OK, "Create")
-		# Add a description
-		self.AddStaticText(1000, c4d.BFH_LEFT, name="This is a molecule creator5")
-		# Add a separator
-		self.AddSeparatorH(100)
+		# Add a button to the dialog
+		self.AddButton(self.BUTTON_ID, c4d.BFH_CENTER, name="Create Molecule")
+
 		return True
 
-	def Command(self, messageId, bc):
-		"""This Method is called automatically when the user clicks on a gadget and/or changes its value this function will be called.
-		It is also called when a string menu item is selected.
-
-		Args:
-			messageId (int): The ID of the gadget that triggered the event.
-			bc (c4d.BaseContainer): The original message container.
-
-		Returns:
-			bool: False if there was an error, otherwise True.
-		"""
+	def Command(self, id, msg):
 		global doc
-		# User click on Ok buttonG
-		if messageId == c4d.DLG_OK:
+		if id == self.BUTTON_ID:
 			doc = documents.GetActiveDocument()
-			print("User created propan2")
-			# Creates a cube in cinema 4D when the user click on the Create button
+
+			# Get the text entered by the user
+			userInput = self.GetString(self.TEXT_FIELD_ID)
+
+			# Parse the user's input and create the molecule
+			molecule = ParseUserInputAndCreateMolecule(userInput)
+			if molecule is None:
+				gui.MessageDialog('''Invalid input! 
+Please enter a valid formula (e.g. C2H6, C3H8, C4H10, ...)''')
+			else:
+				molecule.Generate()
+				c4d.EventAdd()
+
+		return True
+
+# Create an instance of the dialog and open it
+	# def CreateLayout(self):
+	# 	"""This Method is called automatically when Cinema 4D Create the Layout (display) of the Dialog."""
+	# 	# Defines the title of the Dialog
+	# 	self.SetTitle("This is a Molecule Creator5")
+
+	# 	# Creates a button to create a molecule	
+	# 	# Creates a Ok and Cancel Button
+	# 	self.AddDlgGroup(c4d.DLG_OK | c4d.DLG_CANCEL)
+	# 	#Change the name of the Ok button to "Create"
+	# 	self.SetString(c4d.DLG_OK, "Create")
+	# 	# Add a description
+	# 	self.AddStaticText(1000, c4d.BFH_LEFT, name="This is a molecule creator5")
+	# 	# Add a separator
+	# 	self.AddSeparatorH(100)
+	# 	return True
+
+	# def Command(self, messageId, bc):
+	# 	"""This Method is called automatically when the user clicks on a gadget and/or changes its value this function will be called.
+	# 	It is also called when a string menu item is selected.
+
+	# 	Args:
+	# 		messageId (int): The ID of the gadget that triggered the event.
+	# 		bc (c4d.BaseContainer): The original message container.
+
+	# 	Returns:
+	# 		bool: False if there was an error, otherwise True.
+	# 	"""
+	# 	global doc
+	# 	# User click on Ok buttonG
+	# 	if messageId == c4d.DLG_OK:
+	# 		doc = documents.GetActiveDocument()
+	# 		print("User created propan2")
+	# 		# Creates a cube in cinema 4D when the user click on the Create button
 			
-			molecule = CreateMolecule(USER_INPUT)
-			molecule.Generate()
+	# 		molecule = CreateMolecule(USER_INPUT)
+	# 		molecule.Generate()
 
-			# Close the Dialog when the user click on the Create button
-			self.Close()
+	# 		# Close the Dialog when the user click on the Create button
+	# 		self.Close()
 
-			c4d.EventAdd()
-			return True
+	# 		c4d.EventAdd()
+	# 		return True
 		
 
-		# User click on Cancel button
-		elif messageId == c4d.DLG_CANCEL:
-			print("User Click on Cancel")
+	# 	# User click on Cancel button
+	# 	elif messageId == c4d.DLG_CANCEL:
+	# 		print("User Click on Cancel")
 
-			# Close the Dialog
-			self.Close()
-			return True
+	# 		# Close the Dialog
+	# 		self.Close()
+	# 		return True
 
-		return True
-	
-	# #when the user clicks on the Creat button a cube is created
-	# def CreateMolecule(self):
-	# 	active_doc = documents.GetActiveDocument()  # Get the active document
-	# 	# Create a cube
-	# 	cube = c4d.BaseObject(c4d.Ocube)
-	# 	# Insert the cube into the document
-	# 	active_doc.InsertObject(cube)
-	# 	# Update the Cinema 4D UI
-	# 	c4d.EventAdd()
 	# 	return True
+	
+	# # #when the user clicks on the Creat button a cube is created
+	# # def CreateMolecule(self):
+	# # 	active_doc = documents.GetActiveDocument()  # Get the active document
+	# # 	# Create a cube
+	# # 	cube = c4d.BaseObject(c4d.Ocube)
+	# # 	# Insert the cube into the document
+	# # 	active_doc.InsertObject(cube)
+	# # 	# Update the Cinema 4D UI
+	# # 	c4d.EventAdd()
+	# # 	return True
 
 class ExampleDialogCommand(c4d.plugins.CommandData):
 	"""Command Data class that holds the ExampleDialog instance."""
