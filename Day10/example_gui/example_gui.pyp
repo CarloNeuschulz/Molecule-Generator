@@ -73,11 +73,11 @@ class Molecule:
 		return connection
 	
 	#creats the instance object of the molecule
-	def CreateInstance(self, name:str, RefrencObject, parent, position=c4d.Vector(), rotation=c4d.Vector()):
+	def CreatInstance(self, name:str, RefrencObject, parent, position=c4d.Vector(), rotation=c4d.Vector()):
 		instance = c4d.BaseObject(c4d.Oinstance)
 		doc.InsertObject(instance, parent, None)
 		instance.SetName(name)
-		instance.SetRefrenceObject(RefrencObject)
+		instance.SetReferenceObject(RefrencObject)
 		instance.SetAbsPos(position)
 		radians = self.DegToRad(rotation)
 		instance.SetRelRot(radians)
@@ -97,26 +97,147 @@ class Molecule:
 		#Sets the null "lib" object invisible in the editor and renderer
 		null1.SetEditorMode(c4d.MODE_OFF)
 		null1.SetRenderMode(c4d.MODE_OFF)
+
+		self.libraryParent = null1
 		# Create the material for the atom and connection
 		matBlack = self.CreateMaterial('Black', c4d.Vector(0.1, 0.1, 0.1))
 		matWhite = self.CreateMaterial('White', c4d.Vector(1, 1, 1))
 		matGrey = self.CreateMaterial('Grey', c4d.Vector(0.5, 0.5, 0.5))
 		#creat a hydrogen atom and a carbon atom
-		hydrogen = self.CreateAtom('H', 50, null1, matWhite)
-		carbon = self.CreateAtom('C', 100, null1, matBlack)
+		self.hydrogen = self.CreateAtom('H', 50, null1, matWhite)
+		self.carbon = self.CreateAtom('C', 100, null1, matBlack)
 		#creat a connection object
-		connection = self.CreateConnection('connection', 25, 100, null1, matGrey)
-		return (null1, matBlack, matWhite, matGrey, carbon, hydrogen, connection)
-		
+		self.connection = self.CreateConnection('connection', 25, 100, null1, matGrey)
+
+	def CreatIntermediateBlock(self, carbonlibrary, hydrogenLib, connectLib):
+		#Creats null object named "Intermediateblock"
+		intermediateBlockParent = self.CreatNull('Intermediateblock')
+		# Creates the intermediate block that consists of instance objects
+		carbon = self.CreatInstance('Carbon', carbonlibrary, intermediateBlockParent, c4d.Vector(0, 0, 0), c4d.Vector(0, 0, 0))	
+		hydrogen1 = self.CreatInstance('Hydrogen1', hydrogenLib, intermediateBlockParent, c4d.Vector(460, 0, 0), c4d.Vector(0, 0, 0))
+		hydrogen2 = self.CreatInstance('Hydrogen2', hydrogenLib, intermediateBlockParent, c4d.Vector(0, 460, 0), c4d.Vector(0, 0, 0))
+		connection1 = self.CreatInstance('Connection1', connectLib, intermediateBlockParent, c4d.Vector(195, 0, 0), c4d.Vector(0, 0, 90))
+		connection2 = self.CreatInstance('Connection2', connectLib, intermediateBlockParent, c4d.Vector(0, 195, 0), c4d.Vector(0, 0, 0))
+		return intermediateBlockParent
+	
+	def CreatConnectionBlock(self, connectLib):
+		#Creats null object named "Connectionblock"
+		connectionBlockParent = self.CreatNull('Connectionblock')
+		# Creates the connection block that consists of instance objects
+		connection1 = self.CreatInstance('Connection1', connectLib, connectionBlockParent, c4d.Vector(0, 0, 0), c4d.Vector(0, 0, 0))
+		return connectionBlockParent
 
 class MoleculeLinearAlkane(Molecule):
+	def CreateEndingBlock(self, carbonlibrary, hydrogenLib, connectLib):
+		#Creats null object named "Endingblock"
+		endingBlockParent = self.CreatNull('Endingblock')
+		# Creates the ending block that consists of instance objects
+		carbon = self.CreatInstance('Carbon', carbonlibrary, endingBlockParent, c4d.Vector(0, 0, 0), c4d.Vector(0, 0, 0))	
+		hydrogen1 = self.CreatInstance('Hydrogen1', hydrogenLib, endingBlockParent, c4d.Vector(460, 0, 0), c4d.Vector(0, 0, 0))
+		hydrogen2 = self.CreatInstance('Hydrogen2', hydrogenLib, endingBlockParent, c4d.Vector(0, 460, 0), c4d.Vector(0, 0, 0))
+		hydrogen3 = self.CreatInstance('Hydrogen3', hydrogenLib, endingBlockParent, c4d.Vector(0, 0, 460), c4d.Vector(0, 0, 0))
+		connection1 = self.CreatInstance('Connection1', connectLib, endingBlockParent, c4d.Vector(195, 0, 0), c4d.Vector(0, 0, 90))   
+		connection2 = self.CreatInstance('Connection2', connectLib, endingBlockParent, c4d.Vector(0, 195, 0), c4d.Vector(0, 0, 0))
+		connection3 = self.CreatInstance('Connection3', connectLib, endingBlockParent, c4d.Vector(0, 0, 195), c4d.Vector(0, 90, 0))
+		return endingBlockParent
+	
+	def CreatMetheanBlock(self, carbonlibrary, hydrogenLib, connectLib):
+		#Creats null object named "Metheanblock"
+		methanBlockParent = self.CreatNull('Metheanblock')
+		# Creates the methean block that consists of instance objects
+		carbon = self.CreatInstance('Carbon', carbonlibrary, methanBlockParent, c4d.Vector(0, 0, 0), c4d.Vector(0, 0, 0))	
+		hydrogen1 = self.CreatInstance('Hydrogen1', hydrogenLib, methanBlockParent, c4d.Vector(-460, 0, 0), c4d.Vector(0, 0, 0))
+		hydrogen2 = self.CreatInstance('Hydrogen2', hydrogenLib, methanBlockParent, c4d.Vector(0, -460, 0), c4d.Vector(0, 0, 0))
+		hydrogen3 = self.CreatInstance('Hydrogen3', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, -460), c4d.Vector(0, 0, 0))
+		hydrogen4 = self.CreatInstance('Hydrogen4', hydrogenLib, methanBlockParent, c4d.Vector(0, 0, 460), c4d.Vector(0, 0, 0))
+		hydrogen5 = self.CreatInstance('Hydrogen5', hydrogenLib, methanBlockParent, c4d.Vector(0, 460, 0), c4d.Vector(0, 0, 0))
+		hydrogen6 = self.CreatInstance('Hydrogen6', hydrogenLib, methanBlockParent, c4d.Vector(460, 0, 0), c4d.Vector(0, 0, 0))
+		connection1 = self.CreatInstance('Connection1', connectLib, methanBlockParent, c4d.Vector(195, 0, 0), c4d.Vector(0, 0, 90))   
+		connection2 = self.CreatInstance('Connection2', connectLib, methanBlockParent, c4d.Vector(0, 195, 0), c4d.Vector(0, 0, 0))
+		connection3 = self.CreatInstance('Connection3', connectLib, methanBlockParent, c4d.Vector(0, 0, 195), c4d.Vector(0, 90, 0))
+		connection4 = self.CreatInstance('Connection4', connectLib, methanBlockParent, c4d.Vector(0, 0, -195), c4d.Vector(0, 90, 0))
+		connection5 = self.reatInstance('Connection5', connectLib, methanBlockParent, c4d.Vector(0, -195, 0), c4d.Vector(0, 0, 0))
+		connection6 = self.CreatInstance('Connection6', connectLib, methanBlockParent, c4d.Vector(-195, 0, 0), c4d.Vector(0, 0, 90))
+		return methanBlockParent
+	
 	def Generate(self):
 		# TODO: Implement
 		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection")
 		print('Generating linear alkane: mIdx = ', self.moleculeIdx)
 		self.CreatNull(str(self.moleculeIdx))
-	
-		pass
+		
+		numberOfIntermediateBlocks = self.moleculeIdx - 2 #defines how many intermediate blocks will be created based on the number of molecules
+		numberOfConnectionBlocks = self.moleculeIdx - 1 #defines how many connection blocks will be created based on the number of molecules
+		
+		#creating a methan molecule
+		if self.moleculeIdx == 1:
+			methan = self.CreatMetheanBlock(self.carbon, self.hydrogen, self.connection)
+			methan.SetAbsPos(c4d.Vector(0, 0, 0))
+			methan.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
+			return
+		
+		#creating a ethan molecule
+		if self.moleculeIdx == 2:
+			ethan = self.CreateEndingBlock(self.carbon, self.hydrogen, self.connection)
+			ethan.SetAbsPos(c4d.Vector(0, 0, 0))
+			ethan.SetRelRot(self.DegToRad(c4d.Vector(144.7356, -30, 35.2644)))
+			ethan2 = self.CreateEndingBlock(self.carbon, self.hydrogen, self.connection)
+			ethan2.SetAbsPos(c4d.Vector(400, 0, 0))
+			ethan2.SetRelRot(self.DegToRad(c4d.Vector(324.7356, -30, 35.2644)))
+			#creates the connectionBLocks for the ethan molecule
+			connectionBlock = self.CreatConnectionBlock(self.connection)
+			connectionBlock.SetAbsPos(c4d.Vector(200, 0, 0))
+			connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 90)))
+			return
+		
+		
+		# Creating the starting- and ending- block
+		startingBlock = self.CreateEndingBlock(self.carbon, self.hydrogen, self.connection)
+		startingBlock.SetAbsPos(c4d.Vector(0, 0, 0))
+		startingBlock.SetRelRot(self.DegToRad(c4d.Vector(144.7356, -30, 35.2644)))
+
+		x=(numberOfIntermediateBlocks+1)*200
+		endingBlock = self.CreateEndingBlock(self.carbon, self.hydrogen, self.connection)
+		endingBlock.SetAbsPos(c4d.Vector(x, 400, 0))
+		endingBlock.SetRelRot(self.DegToRad(c4d.Vector(324.7356, -30, 35.2644 ))) #sets the rotation of the ending block
+		#if the number of molecules is even, then the ending block will be placed 400 units up on the y-axis
+		#else the ending block will be placed 400 units down on the y-axis
+		if numberOfIntermediateBlocks % 2 == 0:
+			endingBlock.SetAbsPos(c4d.Vector(x, 400, 0))
+		else:
+			endingBlock.SetAbsPos(c4d.Vector(x, 0, 0))
+
+			#loop for creating the intermediate blocks based on the number of "molecule index -2" see in line 129
+		for i in range(numberOfIntermediateBlocks):
+			x=(i+1)*200
+			isEven = (i % 2) == 0 #checks if the number of intermediate blocks is even or odd
+			intermediateBlock = self.CreatIntermediateBlock(self.carbon, self.hydrogen, self.connection)
+			if isEven: 	#checks if the number is even, then it places the intermediate block 200 units up on the y-axis and 200 units to the right on the x-axis
+				intermediateBlock.SetAbsPos(c4d.Vector(x, 400, 0))
+				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 315)))
+			else: 	#if the number is odd, then it places the intermediate block 200 units down on the y-axis and duble the amount of units to the right on the x-axis
+				intermediateBlock.SetAbsPos(c4d.Vector(x, 0, 0))
+				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 135)))
+		#if the numberOfIntermediateBlocks is even rotate the intermediateBlock 90 degrees on the y-axis, els rotate the intermediateBlock 180 degrees on the z-axis
+			if isEven:
+				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(90, 0, 315)))
+			else:
+				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(90, 0, 135)))
+
+		#creates the connectionBLocks based on the number of "molecule index -1" see in line 130
+		for i in range(numberOfConnectionBlocks):
+			x=(i*200+200/2)
+			connectionBlock = self.CreatConnectionBlock(self.connection)
+			connectionBlock.SetAbsPos(c4d.Vector(x, 200, 0))
+			connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
+			#rotates the connectionblock based on if the numberOfConnectionBlocks is even or odd
+			if i % 2 == 0:
+				connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, -330)))
+			else:
+				connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 330)))
+		return
+			
+	pass
 
 class MoleculeCyclicAlkane(Molecule):
 	def Generate(self):
@@ -124,18 +245,16 @@ class MoleculeCyclicAlkane(Molecule):
 		print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
 		pass
 
-
-
-
 def CreateMolecule(userInput: str):
 	# checksuser input
 	# returns either LA or CA (or None if invalid)
  
-	# TODO: Implement
-	if 1 == 1:
-		return MoleculeLinearAlkane(3)
-	elif 2 == 2:
-		return MoleculeCyclicAlkane(4)
+	# # TODO: Implement
+	# if 1 == 1:
+	# 	return MoleculeLinearAlkane(3)
+	# elif 2 == 2:
+	# 	return MoleculeCyclicAlkane(4)
+	return MoleculeLinearAlkane(7)
 	return None
 
 class ExampleDialog(c4d.gui.GeDialog):
