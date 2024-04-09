@@ -249,7 +249,29 @@ class MoleculeCyclicAlkane(Molecule):
 
 # Parses the user's input and returns the molecule index (or -1 if invalid)
 def ParseUserInputAndCreateMolecule(userInput: str):
-	# Parse user input
+	# Check if the first user input is an uppercase "C"
+	if userInput[0] != 'C':
+		print("Invalid input: first character must be 'C'")
+		return None
+
+	# Find the index of 'H' in the userInput
+	hIndex = userInput.find('H')
+
+	# Check if there is an 'H' in the userInput
+	if hIndex == -1:
+		print("Invalid input: no 'H' found")
+		return None
+
+	# Extract the number following the 'C' and before the 'H'
+	moleculeIdx = int(userInput[1:hIndex])
+
+	# Create the appropriate molecule based on the molecule index
+	if moleculeIdx <= 0:
+		print("Invalid input: molecule index must be greater than 0")
+		return None
+	else:
+		return MoleculeLinearAlkane(moleculeIdx)
+	
 	# returns either LA or CA (or None if invalid)
  
 	# # TODO: Implement
@@ -257,8 +279,10 @@ def ParseUserInputAndCreateMolecule(userInput: str):
 	# 	return MoleculeLinearAlkane(3)
 	# elif 2 == 2:
 	# 	return MoleculeCyclicAlkane(4)
-	return MoleculeLinearAlkane(3)
-	return None
+	#return MoleculeLinearAlkane(3)
+	#return None
+
+
 
 
 
@@ -292,74 +316,9 @@ Please enter a valid formula (e.g. C2H6, C3H8, C4H10, ...)''')
 			else:
 				molecule.Generate()
 				c4d.EventAdd()
+		#
+		return True	
 
-		return True
-
-# Create an instance of the dialog and open it
-	# def CreateLayout(self):
-	# 	"""This Method is called automatically when Cinema 4D Create the Layout (display) of the Dialog."""
-	# 	# Defines the title of the Dialog
-	# 	self.SetTitle("This is a Molecule Creator5")
-
-	# 	# Creates a button to create a molecule	
-	# 	# Creates a Ok and Cancel Button
-	# 	self.AddDlgGroup(c4d.DLG_OK | c4d.DLG_CANCEL)
-	# 	#Change the name of the Ok button to "Create"
-	# 	self.SetString(c4d.DLG_OK, "Create")
-	# 	# Add a description
-	# 	self.AddStaticText(1000, c4d.BFH_LEFT, name="This is a molecule creator5")
-	# 	# Add a separator
-	# 	self.AddSeparatorH(100)
-	# 	return True
-
-	# def Command(self, messageId, bc):
-	# 	"""This Method is called automatically when the user clicks on a gadget and/or changes its value this function will be called.
-	# 	It is also called when a string menu item is selected.
-
-	# 	Args:
-	# 		messageId (int): The ID of the gadget that triggered the event.
-	# 		bc (c4d.BaseContainer): The original message container.
-
-	# 	Returns:
-	# 		bool: False if there was an error, otherwise True.
-	# 	"""
-	# 	global doc
-	# 	# User click on Ok buttonG
-	# 	if messageId == c4d.DLG_OK:
-	# 		doc = documents.GetActiveDocument()
-	# 		print("User created propan2")
-	# 		# Creates a cube in cinema 4D when the user click on the Create button
-			
-	# 		molecule = CreateMolecule(USER_INPUT)
-	# 		molecule.Generate()
-
-	# 		# Close the Dialog when the user click on the Create button
-	# 		self.Close()
-
-	# 		c4d.EventAdd()
-	# 		return True
-		
-
-	# 	# User click on Cancel button
-	# 	elif messageId == c4d.DLG_CANCEL:
-	# 		print("User Click on Cancel")
-
-	# 		# Close the Dialog
-	# 		self.Close()
-	# 		return True
-
-	# 	return True
-	
-	# # #when the user clicks on the Creat button a cube is created
-	# # def CreateMolecule(self):
-	# # 	active_doc = documents.GetActiveDocument()  # Get the active document
-	# # 	# Create a cube
-	# # 	cube = c4d.BaseObject(c4d.Ocube)
-	# # 	# Insert the cube into the document
-	# # 	active_doc.InsertObject(cube)
-	# # 	# Update the Cinema 4D UI
-	# # 	c4d.EventAdd()
-	# # 	return True
 
 class ExampleDialogCommand(c4d.plugins.CommandData):
 	"""Command Data class that holds the ExampleDialog instance."""
@@ -396,6 +355,7 @@ class ExampleDialogCommand(c4d.plugins.CommandData):
 
 		# Restores the layout
 		return self.dialog.Restore(pluginid=PLUGIN_ID, secret=sec_ref)
+
 
 
 # main
