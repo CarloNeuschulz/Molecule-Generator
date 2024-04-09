@@ -17,6 +17,7 @@ from c4d import documents
 
 doc: c4d.documents.BaseDocument
 
+
 # Be sure to use a unique ID obtained from www.plugincafe.com
 PLUGIN_ID = 1234897
 
@@ -29,25 +30,99 @@ class Molecule:
 	def Generate(self):
 		print('Generating molecule is happening in child class')
 	
-	def CreatNull(self, name:str):
+	def DegToRad(self, degVector: c4d.Vector)->c4d.Vector:
+		# Convert degrees to radians
+		radX = c4d.utils.DegToRad(degVector.x)
+		radY = c4d.utils.DegToRad(degVector.y)
+		radZ = c4d.utils.DegToRad(degVector.z)
+		return c4d.Vector(radX, radY, radZ)
+
+	#Creats the material for the molecule
+	def CreateMaterial(self, name:str, color: c4d.Vector):
+		mat = c4d.BaseMaterial(c4d.Mmaterial) # Initialize a material
+		mat.SetName(name) # Set the name of the material
+		mat[c4d.MATERIAL_COLOR_COLOR] = color # Set the color of the material
+		doc.InsertMaterial(mat) # Insert the material to the document
+		return mat # Return the material
+	#Inserts the materialTag to the object
+	def InsertMaterialTag(self, op, m):
+		tag = c4d.BaseTag(5616) # Initialize a material tag
+		tag[c4d.TEXTURETAG_MATERIAL] = m # Assign material to the material tag
+		tag[c4d.TEXTURETAG_PROJECTION] = 6 #UVW Mapping
+		op.InsertTag(tag) # Insert tag to the object
+		return tag # Return the tag
+	
+	#creats the atom object
+	def CreateAtom(self, name:str, radius, parent, material):
+		atom = c4d.BaseObject(c4d.Osphere) # Initialize a sphere object
+		doc.InsertObject(atom, parent, None) # Insert the sphere to the document
+		self.InsertMaterialTag(atom, material) # Insert the material tag to the sphere
+		atom[c4d.PRIM_SPHERE_RAD] = radius # Set the radius of the sphere
+		atom.SetName(name) # Set the name of the sphere
+		return atom # Return the sphere object
+	
+	#creats the connection object
+	def CreateConnection(self, name:str, radius, length, parent, material):
+		connection = c4d.BaseObject(c4d.Ocylinder)
+		doc.InsertObject(connection, parent, None)
+		connection.SetName(name)
+		connection[c4d.PRIM_CYLINDER_RADIUS] = radius
+		connection[c4d.PRIM_CYLINDER_HEIGHT] = length
+		connection.InsertUnder(parent)
+		self.InsertMaterialTag(connection, material)
+		return connection
+	
+	#creats the instance object of the molecule
+	def CreateInstance(self, name:str, RefrencObject, parent, position=c4d.Vector(), rotation=c4d.Vector()):
+		instance = c4d.BaseObject(c4d.Oinstance)
+		doc.InsertObject(instance, parent, None)
+		instance.SetName(name)
+		instance.SetRefrenceObject(RefrencObject)
+		instance.SetAbsPos(position)
+		radians = self.DegToRad(rotation)
+		instance.SetRelRot(radians)
+		instance.InsertUnder(parent)
+		return instance
+
+	# Creates a null object in the scene
+	def CreatNull(self, name:str,):
 		null = c4d.BaseObject(c4d.Onull)
 		doc.InsertObject(null, None, None)
 		null.SetName(name)
 		return null
 
+	#creats a library named "lib" that has the atom, connection and material as a child
+	def CreateLibrary(self, null1, matBlack, matWhite, matGrey, carbon, hydrogen, connection):
+		null1 = self.CreatNull('lib')
+		#Sets the null "lib" object invisible in the editor and renderer
+		null1.SetEditorMode(c4d.MODE_OFF)
+		null1.SetRenderMode(c4d.MODE_OFF)
+		# Create the material for the atom and connection
+		matBlack = self.CreateMaterial('Black', c4d.Vector(0.1, 0.1, 0.1))
+		matWhite = self.CreateMaterial('White', c4d.Vector(1, 1, 1))
+		matGrey = self.CreateMaterial('Grey', c4d.Vector(0.5, 0.5, 0.5))
+		#creat a hydrogen atom and a carbon atom
+		hydrogen = self.CreateAtom('H', 50, null1, matWhite)
+		carbon = self.CreateAtom('C', 100, null1, matBlack)
+		#creat a connection object
+		connection = self.CreateConnection('connection', 25, 100, null1, matGrey)
+		return (null1, matBlack, matWhite, matGrey, carbon, hydrogen, connection)
+		
+
 class MoleculeLinearAlkane(Molecule):
 	def Generate(self):
 		# TODO: Implement
+		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection")
 		print('Generating linear alkane: mIdx = ', self.moleculeIdx)
+		self.CreatNull(str(self.moleculeIdx))
+	
 		pass
 
 class MoleculeCyclicAlkane(Molecule):
 	def Generate(self):
 		# TODO: Implement
 		print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
-		self.CreatNull(str(self.moleculeIdx))
 		pass
-
 
 
 
@@ -58,9 +133,9 @@ def CreateMolecule(userInput: str):
  
 	# TODO: Implement
 	if 1 == 1:
-		return MoleculeCyclicAlkane(4)
-	elif 2 == 2:
 		return MoleculeLinearAlkane(3)
+	elif 2 == 2:
+		return MoleculeCyclicAlkane(4)
 	return None
 
 class ExampleDialog(c4d.gui.GeDialog):
