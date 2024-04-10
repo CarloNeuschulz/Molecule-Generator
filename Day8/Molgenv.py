@@ -80,7 +80,7 @@ def Creatlibrary(null, matBlack, matWhite, matGrey, carbon, hydrogen, connect):
 	null.SetEditorMode(c4d.MODE_OFF)
 	null.SetRenderMode(c4d.MODE_OFF)
 
-	#defines the connectionblock length based on the spacing of the atoms using c = sqrt(a^2 + b^2)
+	#defines the connectionblock l3ength based on the spacing of the atoms using c = sqrt(a^2 + b^2)
 	length = (SPACING_X**2 + SPACING_Y**2)**0.5
 	#creats the atoms and connection based on the values given above. 
 	carbon = CreatAtom('Carbon', 100, null, matBlack)

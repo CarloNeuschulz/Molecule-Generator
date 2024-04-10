@@ -318,7 +318,7 @@ class MoleculeCyclicAlkane(Molecule):
 
 # Parses the user's input and returns the molecule index (or -1 if invalid)
 def ParseUserInputAndCreateMolecule(userInput: str):
-	return MoleculeCyclicAlkane(354)
+	# return MoleculeCyclicAlkane(354)
 	# Check if the first user input is an uppercase "C"
 	if userInput[0] != 'C':
 		print("Invalid input: first character must be 'C'")
@@ -335,12 +335,24 @@ def ParseUserInputAndCreateMolecule(userInput: str):
 	# Extract the number following the 'C' and before the 'H'
 	moleculeIdx = int(userInput[1:hIndex])
 
-	# Create the appropriate molecule based on the molecule index
-	if moleculeIdx <= 0:
-		print("Invalid input: molecule index must be greater than 0")
-		return None
+	# Extract the numbers after 'C' and 'H'
+	cNumber = int(userInput[1:hIndex])
+	hNumber = int(userInput[hIndex+1:])
+
+	# Extract the numbers after 'C' and 'H'
+	cNumber = int(userInput[1:hIndex])
+	hNumber = int(userInput[hIndex+1:])
+
+	# Check if the number after 'H' is twice the number after 'C'
+	if hNumber == cNumber * 2:
+		# If the input is valid, return a new MoleculeCyclicAlkane with the number after 'C' as the molecule index
+		return MoleculeCyclicAlkane(cNumber)
+	elif hNumber == cNumber * 2 + 2:
+		# If the input is valid, return a new MoleculeLinearAlkane with the number after 'C' as the molecule index
+		return MoleculeLinearAlkane(cNumber)
 	else:
-		return MoleculeLinearAlkane(moleculeIdx)
+		print("Invalid input: the number after 'H' should be twice the number after 'C' for cyclic alkane or twice the number after 'C' plus 2 for linear alkane")
+		return None
 	
 	# returns either LA or CA (or None if invalid)
  
