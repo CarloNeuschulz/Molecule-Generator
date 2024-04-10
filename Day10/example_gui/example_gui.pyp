@@ -283,26 +283,40 @@ def ParseUserInputAndCreateMolecule(userInput: str):
 	#return None
 
 
-
-
-
 class ExampleDialog(c4d.gui.GeDialog):
 	TEXT_FIELD_ID = 1000
-	BUTTON_ID = 1001
+	CREATE_BUTTON_ID = 1001
+	DELET_BUTTON_ID = 1002
 
 	def CreateLayout(self):
-		# Add a larger text field to the dialog
 		self.AddEditText(self.TEXT_FIELD_ID, c4d.BFH_SCALEFIT, initw=300)
 		self.SetString(self.TEXT_FIELD_ID, "C3H8")  # Default text
-
-		# Add a button to the dialog
-		self.AddButton(self.BUTTON_ID, c4d.BFH_CENTER, name="Create Molecule")
-
+		self.AddButton(self.CREATE_BUTTON_ID, c4d.BFH_CENTER, name="Create Molecule")
+		self.AddButton(self.DELET_BUTTON_ID, c4d.BFH_CENTER, name="Delete all Everything")
 		return True
 
-	def Command(self, id, msg):
+	def delete_all_objects(self): #takes all objects in the active document and delets them
 		global doc
-		if id == self.BUTTON_ID:
+		doc = documents.GetActiveDocument()
+		allObjects = doc.GetObjects()
+		for obj in allObjects:
+			obj.Remove()
+		
+		allMats = doc.GetMaterials()
+		for obj in allMats:
+			obj.Remove()
+
+
+		c4d.EventAdd()  # Notify Cinema 4D that the document has been changed
+
+	def Command(self, id, msg):
+		# if id == self.CREATE_BUTTON_ID:
+		# 	userInput = self.GetString(self.TEXT_FIELD_ID)
+		# 	molecule = ParseUserInputAndCreateMolecule(userInput)
+		# 	if molecule is not None:
+		# 		molecule.CreateMolecule() #"""here is a problem with the CreateMolecule function, it is not defined in the Molecule class."""
+		global doc
+		if id == self.CREATE_BUTTON_ID:
 			doc = documents.GetActiveDocument()
 
 			# Get the text entered by the user
@@ -316,7 +330,9 @@ Please enter a valid formula (e.g. C2H6, C3H8, C4H10, ...)''')
 			else:
 				molecule.Generate()
 				c4d.EventAdd()
-		#
+		elif id == self.DELET_BUTTON_ID:
+			self.delete_all_objects()
+		
 		return True	
 
 
@@ -355,7 +371,6 @@ class ExampleDialogCommand(c4d.plugins.CommandData):
 
 		# Restores the layout
 		return self.dialog.Restore(pluginid=PLUGIN_ID, secret=sec_ref)
-
 
 
 # main
