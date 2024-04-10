@@ -260,6 +260,7 @@ class MoleculeCyclicAlkane(Molecule):
 		alphaDeg = 360/numberOfIntermediateBlocks
 		alphaRad = c4d.utils.DegToRad(alphaDeg)
 		
+		lastRotation = alphaDeg #defines the last rotation of the intermediate block
 		#A for loop will be used to create the intermediate blocks based on the number of molecules	(moleculeIdx/numberOfIntermediateBlocks)
 		for i in range(numberOfIntermediateBlocks):
 
@@ -274,17 +275,18 @@ class MoleculeCyclicAlkane(Molecule):
 			y = molRadius * sn
 			x = molRadius * cs
 			print(x, y)
-		
+
+			rotation = lastRotation - alphaDeg 
+			
 			#if i == 0:
 			#Creates the first intermediate block with sn, cs, x and y and repeats it for the number of molecules
 			intermediateBlock = self.CreatIntermediateBlock(self.carbon, self.hydrogen, self.connection)
-			intermediateBlock.SetAbsPos(c4d.Vector(x, y, 0))
-			 	#intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
-			# #if not send invalid message.
-			# else:
-			# 	print('Invalid input: molecule index must be greater than 0')
-			# 	return -1
-			
+			intermediateBlock.SetAbsPos(c4d.Vector(x, y, 0))	
+			intermediateBlock[c4d.ID_BASEOBJECT_ROTATION_ORDER] = c4d.ID_BASEOBJECT_ROTATION_ORDER_XYZ
+			#rotates the intermediateBlock 45 degres on the z-axis for each new intermediateBlock
+			intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(-90, -45, rotation)))
+			#rotates the following intermediateBlock 45 degres on the z-axis for each new intermediateBlock
+			lastRotation = rotation #updates the last rotation to the current rotation
 
 
 		# print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
