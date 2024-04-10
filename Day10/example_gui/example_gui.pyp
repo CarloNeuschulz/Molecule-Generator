@@ -13,6 +13,7 @@ Class/method highlighted:
 	- GeDialog.Command()
 """
 import c4d
+import math
 from c4d import documents
 from c4d import gui
 
@@ -243,12 +244,59 @@ class MoleculeLinearAlkane(Molecule):
 class MoleculeCyclicAlkane(Molecule):
 	def Generate(self):
 		# TODO: Implement
+		#Creats the library for creating cyclic alkane
+		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection")
 		print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
-		pass
+		self.CreatNull(str(self.moleculeIdx)) #add later the name of the molecule (the userInput)
+
+		#Defines the math needed to know how many connections and intermediate blocks will be needed.
+		numberOfIntermediateBlocks = self.moleculeIdx
+		numberOfConnectionBlocks = self.moleculeIdx
+		#defines the math needed to know where to position the intermidiate blocks
+		#For the cyclic alkane, the intermediate blocks will be placed in an imaginery circle
+		#The radius of the circle is 200 units
+		#The molecules will be placed 100 units from the center of the circle (definign the radius), the center is at 0,0,0
+		#The angle between each intermediate block is 360/moleculeIdx
+		alphaDeg = 360/numberOfIntermediateBlocks
+		alphaRad = c4d.utils.DegToRad(alphaDeg)
+		
+		#A for loop will be used to create the intermediate blocks based on the number of molecules	(moleculeIdx/numberOfIntermediateBlocks)
+		for i in range(numberOfIntermediateBlocks):
+
+			conLength = 300
+
+
+			molRadius = conLength / math.sqrt(2*(1 - math.cos(alphaRad)))
+			# molRadius = 200
+
+
+			sn, cs = c4d.utils.SinCos(i * alphaRad)
+			y = molRadius * sn
+			x = molRadius * cs
+			print(x, y)
+		
+			#if i == 0:
+			#Creates the first intermediate block with sn, cs, x and y and repeats it for the number of molecules
+			intermediateBlock = self.CreatIntermediateBlock(self.carbon, self.hydrogen, self.connection)
+			intermediateBlock.SetAbsPos(c4d.Vector(x, y, 0))
+			 	#intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
+			# #if not send invalid message.
+			# else:
+			# 	print('Invalid input: molecule index must be greater than 0')
+			# 	return -1
+			
+
+
+		# print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
+		# pass
+  #and places them on the circle based on the follwing formulars for x and y
+			#The x and y position of the intermediate blocks will be calculated by the following formulas
+   
 
 
 # Parses the user's input and returns the molecule index (or -1 if invalid)
 def ParseUserInputAndCreateMolecule(userInput: str):
+	return MoleculeCyclicAlkane(10)
 	# Check if the first user input is an uppercase "C"
 	if userInput[0] != 'C':
 		print("Invalid input: first character must be 'C'")
