@@ -24,6 +24,7 @@ doc: c4d.documents.BaseDocument
 PLUGIN_ID = 1234897
 
 USER_INPUT = "C4H10"
+CONNECTION_LENGTH = 450
 
 class Molecule:
 	def __init__(self, moleculeIdx: int):
@@ -109,7 +110,7 @@ class Molecule:
 		self.hydrogen = self.CreateAtom('H', 50, null1, matWhite)
 		self.carbon = self.CreateAtom('C', 100, null1, matBlack)
 		#creat a connection object
-		self.connection = self.CreateConnection('connection', 20, 450, null1, matGrey)
+		self.connection = self.CreateConnection('connection', 20, CONNECTION_LENGTH, null1, matGrey)
 
 	def CreatIntermediateBlock(self, carbonlibrary, hydrogenLib, connectLib):
 		#Creats null object named "Intermediateblock"
@@ -260,63 +261,64 @@ class MoleculeCyclicAlkane(Molecule):
 		alphaDeg = 360/numberOfIntermediateBlocks
 		alphaRad = c4d.utils.DegToRad(alphaDeg)
 		
-		lastRot = 60  #defines the last rotation of the connectionblock block
 		lastRotation = alphaDeg #defines the last rotation of the intermediate block
 		#A for loop will be used to create the intermediate blocks based on the number of molecules	(moleculeIdx/numberOfIntermediateBlocks)
 		for i in range(numberOfIntermediateBlocks):
 
-			conLength = 300
-
-			molRadius = conLength / math.sqrt(2*(1 - math.cos(alphaRad)))
+			molRadius = CONNECTION_LENGTH / math.sqrt(2*(1 - math.cos(alphaRad)))
 			# molRadius = 200
-   
-			sn, cs = c4d.utils.SinCos(i * alphaRad)
+
+			currentAlphaRad = i * alphaRad
+			sn, cs = c4d.utils.SinCos(currentAlphaRad)
 			y = molRadius * sn
 			x = molRadius * cs
 			print(x, y)
 
 			rotation = lastRotation - alphaDeg 
-			Rot = lastRot - 60
-			#if i == 0:
-			#Creates the first intermediate block with sn, cs, x and y and repeats it for the number of molecules
-			intermediateBlock = self.CreatIntermediateBlock(self.carbon, self.hydrogen, self.connection)
-			intermediateBlock.SetAbsPos(c4d.Vector(x, y, 0))	
-			intermediateBlock[c4d.ID_BASEOBJECT_ROTATION_ORDER] = c4d.ID_BASEOBJECT_ROTATION_ORDER_XYZ
-			#rotates the intermediateBlock 45 degres on the z-axis for each new intermediateBlock
-			intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(-90, -45, rotation)))
-			#rotates the following intermediateBlock 45 degres on the z-axis for each new intermediateBlock
-			lastRotation = rotation #updates the last rotation to the current rotation
-			#creats a null object named "PosOffset" and places it in the center of the circle
-			posOffset = self.CreatNull('PosOffset')
-			posOffset.SetAbsPos(c4d.Vector(x, y, 0))
-			#rotates the "PosOffset" -60 degrees on the z-axis
-			posOffset[c4d.ID_BASEOBJECT_ROTATION_ORDER] = c4d.ID_BASEOBJECT_ROTATION_ORDER_XYZ
-			posOffset.SetRelRot(self.DegToRad(c4d.Vector(0, 0, Rot)))
-			lastRot = Rot
+
 			#creates the connectionBLocks based on the number of "molecule index" 
 			connectionBlock = self.CreatConnectionBlock(self.connection)
 			#Sets the conectionblock 225 units down on the y axis
-			connectionBlock.SetAbsPos(c4d.Vector(-73, -149, 3))
-			#rotates the connectionblock 35 degrees on the x-axis
-			connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 33)))
+			connectionBlock.SetAbsPos(c4d.Vector(0, -CONNECTION_LENGTH/2, 0))
+
+			#creats a null object named "PosOffset" and places it in the center of the circle
+			posOffset = self.CreatNull('PosOffset'+str(i))
 			#inserts the connectionblock under the Null object known as "PosOffset"
 			connectionBlock.InsertUnder(posOffset)
 
+			# posOffset.SetAbsPos(c4d.Vector(x, y, 0))
+			#rotates the "PosOffset" -60 degrees on the z-axis
+			# posOffset[c4d.ID_BASEOBJECT_ROTATION_ORDER] = c4d.ID_BASEOBJECT_ROTATION_ORDER_XYZ
+			
+
+			# # Set the PosOffset position to the intermediateBlock position
+			# posOffset.SetAbsPos(intermediateBlock.GetAbsPos())
 
 
-			#for i in range(numberOfConnectionBlocks):
+			#Creates the first intermediate block with sn, cs, x and y and repeats it for the number of molecules
+			intermediateBlock = self.CreatIntermediateBlock(self.carbon, self.hydrogen, self.connection)
 
+			
+			intermediateBlock[c4d.ID_BASEOBJECT_ROTATION_ORDER] = c4d.ID_BASEOBJECT_ROTATION_ORDER_XYZ
+			#rotates the intermediateBlock 45 degres on the z-axis for each new intermediateBlock
+			# intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(-90, -45, 0)))
+			intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(-90, -45, rotation)))
+			#rotates the following intermediateBlock 45 degres on the z-axis for each new intermediateBlock
+			
+			intermediateBlock.SetAbsPos(c4d.Vector(x, y, 0))	
 
-		# print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
-		# pass
-  #and places them on the circle based on the follwing formulars for x and y
-			#The x and y position of the intermediate blocks will be calculated by the following formulas
-   
+			
+			# Set the PosOffset position to the intermediateBlock position
+			posOffset.SetAbsPos(intermediateBlock.GetAbsPos())
+			posOffset.SetRelRot(self.DegToRad(c4d.Vector(0, 0, rotation + alphaDeg / 2)))
+			# posOffset.InsertUnder(intermediateBlock)
+
+			lastRotation = rotation #updates the last rotation to the current rotation
 
 
 # Parses the user's input and returns the molecule index (or -1 if invalid)
 def ParseUserInputAndCreateMolecule(userInput: str):
-	return MoleculeCyclicAlkane(6)
+	return MoleculeCyclicAlkane(354)
 	# Check if the first user input is an uppercase "C"
 	if userInput[0] != 'C':
 		print("Invalid input: first character must be 'C'")
