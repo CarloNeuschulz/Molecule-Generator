@@ -371,10 +371,12 @@ class ExampleDialog(c4d.gui.GeDialog):
 	DELET_BUTTON_ID = 1002
 
 	def CreateLayout(self):
+		#Adds a text that tells the user to write the formula in the text field
+		self.SetTitle("Molecule Creator")
 		self.AddEditText(self.TEXT_FIELD_ID, c4d.BFH_SCALEFIT, initw=300)
-		self.SetString(self.TEXT_FIELD_ID, "C3H8")  # Default text
+		self.SetString(self.TEXT_FIELD_ID, "Write here your Formular, z.B: C4H8 / C4H10")  # Default text
 		self.AddButton(self.CREATE_BUTTON_ID, c4d.BFH_CENTER, name="Create Molecule")
-		self.AddButton(self.DELET_BUTTON_ID, c4d.BFH_CENTER, name="Delete all Everything")
+		self.AddButton(self.DELET_BUTTON_ID, c4d.BFH_CENTER, name="Delete Everything")
 		return True
 
 	def delete_all_objects(self): #takes all objects in the active document and delets them
@@ -459,7 +461,7 @@ class ExampleDialogCommand(c4d.plugins.CommandData):
 if __name__ == "__main__":
 	# Registers the plugin
 	c4d.plugins.RegisterCommandPlugin(id=PLUGIN_ID,
-									  str="Py-CommandData Dialog",
+									  str="Molecule Creator Plugin",
 									  info=0,
 									  help="Display a basic GUI",
 									  dat=ExampleDialogCommand(),
