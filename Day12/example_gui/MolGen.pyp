@@ -54,7 +54,7 @@ class Molecule:
 		tag[c4d.TEXTURETAG_PROJECTION] = 6 #UVW Mapping
 		op.InsertTag(tag) # Insert tag to the object
 		return tag # Return the tag
-	
+
 	#creats the atom object
 	def CreateAtom(self, name:str, radius, parent, material):
 		atom = c4d.BaseObject(c4d.Osphere) # Initialize a sphere object
@@ -192,7 +192,6 @@ class MoleculeLinearAlkane(Molecule):
 			connectionBlock.SetAbsPos(c4d.Vector(200, 0, 0))
 			connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 90)))
 			return
-		
 		
 		# Creating the starting- and ending- block
 		startingBlock = self.CreateEndingBlock(self.carbon, self.hydrogen, self.connection)
@@ -332,9 +331,19 @@ def ParseUserInputAndCreateMolecule(userInput: str):
 		print("Invalid input: no 'H' found")
 		return None
 	
-	# Check if there is no number between 'C' and 'H' and the number after 'H' equals 1*2+2
-	if hIndex == 1 and userInput[1:] == 'H4':
-		return MoleculeLinearAlkane(1)
+	# Check if the input is "C2H4"
+	if userInput == 'C2H4':
+		print("Invalid input: this molecule does not exist")
+		return None
+
+	# Check if there is no number between 'C' and 'H' and the number after 'H' is not 4
+	if hIndex == 1:
+		if userInput[1:] == 'H4':
+			return MoleculeLinearAlkane(1)
+		else:
+			print("Invalid input: the number after 'H' should be 4")
+			return None
+
 
 	# Extract the number following the 'C' and before the 'H'
 	moleculeIdx = int(userInput[1:hIndex])
