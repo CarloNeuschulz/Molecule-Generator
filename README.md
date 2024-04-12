@@ -66,3 +66,5 @@ This project is Copyright: MAXON Computer GmbH and Carlo Neuschulz
 ## Contact
 For any questions or inquiries, please contact [Carlo.Neuschulz@gmail.com]
 
+##### Thanks to all at Maxon for taking me in as an intern, showing me everything and giving me the oppertunity to work with amazing people that helped me develop this script. <3
+##### Special thanks to Jana Bröckling and Ilia Mazlov for looking after me. (it was one of the best easter holidays for me) :D
