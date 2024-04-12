@@ -1,9 +1,9 @@
 """
 Copyright: MAXON Computer GmbH
-Author: Maxime Adam
+Author: Carlo Neuschulz
 
 Description:
-	- Creates a Dialog which display 2 buttons OK and Cancel.
+	- Creates a Molecule Generator plugin.
 
 Class/method highlighted:
 	- c4d.plugins.CommandData
@@ -30,7 +30,7 @@ class Molecule:
 	def __init__(self, moleculeIdx: int):
 		self.moleculeIdx = moleculeIdx
 
-	def Generate(self):
+	def Generate(self, molName):
 		print('Generating molecule is happening in child class')
 	
 	def DegToRad(self, degVector: c4d.Vector)->c4d.Vector:
@@ -95,11 +95,14 @@ class Molecule:
 		return null
 
 	#creats a library named "lib" that has the atom, connection and material as a child
-	def CreateLibrary(self, null1, matBlack, matWhite, matGrey, carbon, hydrogen, connection):
+	def CreateLibrary(self, null1, matBlack, matWhite, matGrey, carbon, hydrogen, connection, parent=None):
 		null1 = self.CreatNull('lib')
 		#Sets the null "lib" object invisible in the editor and renderer
 		null1.SetEditorMode(c4d.MODE_OFF)
 		null1.SetRenderMode(c4d.MODE_OFF)
+		
+		if parent is not None:
+			null1.InsertUnder(parent)
 
 		self.libraryParent = null1
 		# Create the material for the atom and connection
@@ -163,21 +166,23 @@ class MoleculeLinearAlkane(Molecule):
 		connection6 = self.CreatInstance('Connection6', connectLib, methanBlockParent, c4d.Vector(-195, 0, 0), c4d.Vector(0, 0, 90))
 		return methanBlockParent
 	
-	def Generate(self):
+	def Generate(self, molName):
 		# TODO: Implement
-		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection")
+		moleculeIdxNull = self.CreatNull(molName)
+		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection", moleculeIdxNull)
 		print('Generating linear alkane: mIdx = ', self.moleculeIdx)
-		self.CreatNull(str(self.moleculeIdx))
 		
 		numberOfIntermediateBlocks = self.moleculeIdx - 2 #defines how many intermediate blocks will be created based on the number of molecules
 		numberOfConnectionBlocks = self.moleculeIdx - 1 #defines how many connection blocks will be created based on the number of molecules
 		
 		#creating a methan molecule
 		if self.moleculeIdx == 1:
-			methan = self.CreatMetheanBlock(self.carbon, self.hydrogen, self.connection)
-			methan.SetAbsPos(c4d.Vector(0, 0, 0))
-			methan.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
-			return
+				methan = self.CreatMetheanBlock(self.carbon, self.hydrogen, self.connection)
+				methan.SetAbsPos(c4d.Vector(0, 0, 0))
+				methan.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 0)))
+				methan.InsertUnder(moleculeIdxNull)
+				return
+
 		
 		#creating a ethan molecule
 		if self.moleculeIdx == 2:
@@ -191,6 +196,10 @@ class MoleculeLinearAlkane(Molecule):
 			connectionBlock = self.CreatConnectionBlock(self.connection)
 			connectionBlock.SetAbsPos(c4d.Vector(200, 0, 0))
 			connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 90)))
+			ethan.InsertUnder(moleculeIdxNull)
+			ethan2.InsertUnder(moleculeIdxNull)
+			connectionBlock.InsertUnder(moleculeIdxNull)
+			
 			return
 		
 		# Creating the starting- and ending- block
@@ -225,6 +234,7 @@ class MoleculeLinearAlkane(Molecule):
 				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(90, 0, 315)))
 			else:
 				intermediateBlock.SetRelRot(self.DegToRad(c4d.Vector(90, 0, 135)))
+			intermediateBlock.InsertUnder(moleculeIdxNull)
 
 		#creates the connectionBLocks based on the number of "molecule index -1" see in line 130
 		for i in range(numberOfConnectionBlocks):
@@ -237,17 +247,24 @@ class MoleculeLinearAlkane(Molecule):
 				connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, -330)))
 			else:
 				connectionBlock.SetRelRot(self.DegToRad(c4d.Vector(0, 0, 330)))
+
+		 # Insert the created objects under the Null object known as "moleculeIdx"
+			connectionBlock.InsertUnder(moleculeIdxNull)
+			endingBlock.InsertUnder(moleculeIdxNull)
+			startingBlock.InsertUnder(moleculeIdxNull)
 		return
 			
 	pass
 
 class MoleculeCyclicAlkane(Molecule):
-	def Generate(self):
+	def Generate(self, molName):
 		# TODO: Implement
+		null = self.CreatNull(molName)
 		#Creats the library for creating cyclic alkane
-		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection")
+		self.CreateLibrary("Library", "Black", "White", "Grey", "Carbon", "Hydrogen", "Connection", null)
 		print('Generating cyclic alkane: mIdx = ', self.moleculeIdx)
-		self.CreatNull(str(self.moleculeIdx)) #add later the name of the molecule (the userInput)
+
+
 
 		#Defines the math needed to know how many connections and intermediate blocks will be needed.
 		numberOfIntermediateBlocks = self.moleculeIdx
@@ -311,6 +328,10 @@ class MoleculeCyclicAlkane(Molecule):
 			posOffset.SetAbsPos(intermediateBlock.GetAbsPos())
 			posOffset.SetRelRot(self.DegToRad(c4d.Vector(0, 0, rotation + alphaDeg / 2)))
 			# posOffset.InsertUnder(intermediateBlock)
+   
+			# Insert the created objects under the Null object known as "moleculeIdx"
+			posOffset.InsertUnder(null)
+			intermediateBlock.InsertUnder(null)
 
 			lastRotation = rotation #updates the last rotation to the current rotation
 
@@ -383,12 +404,55 @@ class ExampleDialog(c4d.gui.GeDialog):
 	CREATE_BUTTON_ID = 1001
 	DELET_BUTTON_ID = 1002
 	HELP_BUTTON_ID = 1003
+	LALKANE_TYPE_COMBO_BOX_ID = 1004  # New combo box ID for alkane type
+	CALKANE_TYPE_COMBO_BOX_ID = 1005  # New combo box ID for formula
 
+
+	alkane_types = ["CH4", "C2H6", "C3H8", "C4H10", "C5H12", "C6H14", "C7H16", "C8H18", "C9H20", "C10H22"]
+	formula_types = ["C3H6", "C4H8", "C5H10", "C6H12", "C7H14", "C8H16", "C9H18", "C10H20"]
+	
 	def CreateLayout(self):
 		#Adds a text that tells the user to write the formula in the text field
 		self.SetTitle("Molecule Creator")
-		self.AddEditText(self.TEXT_FIELD_ID, c4d.BFH_SCALEFIT, initw=300)
-		self.SetString(self.TEXT_FIELD_ID, "Write here your Formular, z.B: C4H8 / C4H10")  # Default text
+		
+		editTextGadget = self.AddEditText(id=ExampleDialog.TEXT_FIELD_ID, flags=c4d.BFH_SCALEFIT , editflags=c4d.EDITTEXT_HELPTEXT | c4d.EDITTEXT_ENABLECLEARBUTTON)  
+		self.SetString(id = editTextGadget,value = "Write here your Formular, e.g.: C4H8 / C4H10",flags = c4d.EDITTEXT_HELPTEXT)   
+
+		# Add a label for the alkane type combo box
+		self.AddStaticText(0, c4d.BFH_LEFT, name=" Basic linear alkane formulas:")
+		# Add a combo box for the alkane type with "Linear alkane" as an option
+		self.AddComboBox(self.LALKANE_TYPE_COMBO_BOX_ID, c4d.BFH_SCALEFIT)
+		#self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 1, "Linear alkane")
+
+		for i, alkane_type in enumerate(ExampleDialog.alkane_types, start=0):
+			self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, i, alkane_type)
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 2, "CH4")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 3, "C2H6")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 4, "C3H8")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 5, "C4H10")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 6, "C5H12")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 7, "C6H14")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 8, "C7H16")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 9, "C8H18")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 10, "C9H20")
+		# self.AddChild(self.LALKANE_TYPE_COMBO_BOX_ID, 11, "C10H22")
+
+		# Add a label for the formula combo box
+		self.AddStaticText(0, c4d.BFH_LEFT, name=" Basic cyclo alkane formulas:")
+		# Add a combo box for the formula with "C4H12" as an option
+		self.AddComboBox(self.CALKANE_TYPE_COMBO_BOX_ID, c4d.BFH_SCALEFIT)
+
+		for i, formula_type in enumerate(ExampleDialog.formula_types, start=0):
+			self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, i, formula_type)
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 1, "C3H6")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 2, "C4H8")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 3, "C5H10")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 4, "C6H12")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 5, "C7H14")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 6, "C8H16")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 7, "C9H18")
+		# self.AddChild(self.CALKANE_TYPE_COMBO_BOX_ID, 8, "C10H20")
+  
 		self.AddSeparatorH(c4d.BFH_SCALE)
 		self.AddButton(self.CREATE_BUTTON_ID, c4d.BFH_CENTER, name="Create Molecule")
 		self.AddSeparatorH(c4d.BFH_SCALE)
@@ -396,6 +460,7 @@ class ExampleDialog(c4d.gui.GeDialog):
 		self.AddSeparatorH(c4d.BFH_SCALE)
 		self.AddButton(self.HELP_BUTTON_ID, c4d.BFH_CENTER, name="Help?")
 		return True
+	
 
 	def delete_all_objects(self): #takes all objects in the active document and delets them
 		global doc
@@ -412,6 +477,34 @@ class ExampleDialog(c4d.gui.GeDialog):
 		c4d.EventAdd()  # Notify Cinema 4D that the document has been changed
 
 	def Command(self, id, msg):
+
+		if id == self.CALKANE_TYPE_COMBO_BOX_ID:
+		# Get the ID of the selected option in the CALKANE_TYPE_COMBO_BOX_ID combo box
+			selectedOptionId = self.GetInt32(self.CALKANE_TYPE_COMBO_BOX_ID)
+			print(selectedOptionId)
+			formulaText = ExampleDialog.formula_types[selectedOptionId]
+			print(formulaText)
+
+			# Update the text field based on the selected option
+			self.SetString(ExampleDialog.TEXT_FIELD_ID, formulaText)
+
+		if id == self.LALKANE_TYPE_COMBO_BOX_ID:
+		# Get the ID of the selected option in the LALKANE_TYPE_COMBO_BOX_ID combo box
+			# selectedOptionId = self.GetSelectedItemId(self.LALKANE_TYPE_COMBO_BOX_ID)
+			selectedOptionId = self.GetInt32(self.LALKANE_TYPE_COMBO_BOX_ID)
+			print(selectedOptionId)
+			formulaText = ExampleDialog.alkane_types[selectedOptionId]
+			print(formulaText)
+
+		# Update the text field based on the selected option
+			self.SetString(ExampleDialog.TEXT_FIELD_ID, formulaText)
+
+		if id == self.CREATE_BUTTON_ID:
+			userInput = self.GetString(self.TEXT_FIELD_ID)
+			if not userInput:  # Check if the text field is empty
+				self.Command(self.HELP_BUTTON_ID, msg)  # Simulate a press of the "Help?" button
+				return True
+			
 		if id == self.HELP_BUTTON_ID:
 			c4d.gui.MessageDialog("""
 			Here is some information on how to use the plugin!	
@@ -458,11 +551,10 @@ class ExampleDialog(c4d.gui.GeDialog):
 				gui.MessageDialog('''Invalid input! 
 Please enter a valid formula (e.g. C2H6, C3H8, C4H10, ...)''')
 			else:
-				molecule.Generate()
+				molecule.Generate(userInput)
 				c4d.EventAdd()
 		elif id == self.DELET_BUTTON_ID:
 			self.delete_all_objects()
-		
 		return True	
 
 
@@ -502,6 +594,27 @@ class ExampleDialogCommand(c4d.plugins.CommandData):
 		# Restores the layout
 		return self.dialog.Restore(pluginid=PLUGIN_ID, secret=sec_ref)
 
+# class ObjectGrouping:
+# 	def __init__(self):
+# 				self.doc = documents.GetActiveDocument()
+			
+# 	def group_objects(self):
+# 		# Get all active objects in the document
+# 		active_objects = self.doc.GetActiveObjects(c4d.GETACTIVEOBJECTFLAGS_CHILDREN)
+				
+# 		# Create a null object to group the active objects
+# 		null_object = c4d.BaseObject(c4d.Onull)
+# 		null_object.SetName("Object Group")
+				
+# 		# Set the null object as the parent of the active objects
+# 		for obj in active_objects:
+# 			obj.InsertUnder(null_object)
+				
+# 		# Insert the null object into the document
+# 		self.doc.InsertObject(null_object)
+				
+# 	# Update the scene	
+# 	c4d.EventAdd()
 
 # main
 if __name__ == "__main__":
