@@ -65,4 +65,4 @@ This project is Copyright: MAXON Computer GmbH and Carlo Neuschulz
 
 ## Contact
 For any questions or inquiries, please contact [Carlo.Neuschulz@gmail.com]
-(mailto:your-email@example.com).
+
